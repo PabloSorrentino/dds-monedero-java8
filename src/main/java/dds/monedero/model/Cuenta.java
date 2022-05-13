@@ -29,13 +29,13 @@ public class Cuenta {
 
   private void checkearCantidadDepositosPermitidos(){
     if (depositos.stream().filter(movimiento -> movimiento.getFecha().getDayOfYear() == LocalDate.now().getDayOfYear()).count() >= DEPOSITOS_MAXIMO_DIAROS) {
-      throw new MaximaCantidadDepositosException("Ya excedio los " + DEPOSITOS_MAXIMO_DIAROS + " depositos diarios");
+      throw new MaximaCantidadDepositosException(Double.toString(DEPOSITOS_MAXIMO_DIAROS));
     }
   }
 
   private void checkearMontoPositivo(double cuanto) {
     if (cuanto <= 0) {
-      throw new MontoNegativoException(cuanto + ": el monto a ingresar debe ser un valor positivo");
+      throw new MontoNegativoException(Double.toString(cuanto));
     }
   }
 
@@ -46,7 +46,7 @@ public class Cuenta {
 
   private void checkearMontoFinalDespuesDeSacar(double cuanto) {
     if (this.saldo - cuanto < 0) {
-      throw new SaldoMenorException("No puede sacar mas de " + this.saldo + " $");
+      throw new SaldoMenorException(Double.toString(saldo));
     }
   }
 
@@ -71,12 +71,12 @@ public class Cuenta {
     }
   }
 
-  public void agregarDeposito(double cuanto) {
+  private void agregarDeposito(double cuanto) {
     Deposito deposito = new Deposito(LocalDate.now(), cuanto);
     depositos.add(deposito);
   }
 
-  public void agregarExtraccion(double cuanto) {
+  private void agregarExtraccion(double cuanto) {
     Extraccion extraccion = new Extraccion(LocalDate.now(), cuanto);
     extracciones.add(extraccion);
   }

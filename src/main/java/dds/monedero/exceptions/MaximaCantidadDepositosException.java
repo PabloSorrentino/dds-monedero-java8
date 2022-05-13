@@ -3,7 +3,7 @@ package dds.monedero.exceptions;
 public class MaximaCantidadDepositosException extends RuntimeException {
 
   public MaximaCantidadDepositosException(String message) {
-    super(message);
+    super("Ya excedio los " + message + " depositos diarios");
   }
 
 }
