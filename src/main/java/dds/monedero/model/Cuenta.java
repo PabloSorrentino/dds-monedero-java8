@@ -18,17 +18,32 @@ public class Cuenta {
     saldo = montoInicial;
   }
 
-
   public void poner(double cuanto) {
-    if (cuanto <= 0) {
-      throw new MontoNegativoException(cuanto + ": el monto a ingresar debe ser un valor positivo");
-    }
+   this.checkearCantidadDepositosPermitidos();
+   this.agregarSaldo(cuanto);
+   this.agregarMovimiento(LocalDate.now(), cuanto, true);
+  }
 
+  private void checkearCantidadDepositosPermitidos(){
     if (getMovimientos().stream().filter(movimiento -> movimiento.isDeposito()).count() >= 3) {
       throw new MaximaCantidadDepositosException("Ya excedio los " + 3 + " depositos diarios");
     }
+  }
 
-    new Movimiento(LocalDate.now(), cuanto, true).agregateA(this);
+  private void checkearMontoPositivo(double cuanto) {
+    if (cuanto <= 0) {
+      throw new MontoNegativoException(cuanto + ": el monto a ingresar debe ser un valor positivo");
+    }
+  }
+
+  private void agregarSaldo(double cuanto) {
+    this.checkearMontoPositivo(cuanto);
+    this.saldo += cuanto;
+  }
+
+  private void quitarSaldo(double cuanto) {
+    this.checkearMontoPositivo(cuanto);
+    this.saldo -= cuanto;
   }
 
   public void sacar(double cuanto) {
