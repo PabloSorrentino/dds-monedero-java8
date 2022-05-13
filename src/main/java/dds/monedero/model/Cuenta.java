@@ -13,7 +13,9 @@ public class Cuenta {
 
   private double saldo;
   private double LIMITE_EXTRACCION_DIARIO = 1000;
-  private List<Movimiento> movimientos = new ArrayList<>();
+  private double DEPOSITOS_MAXIMO_DIAROS = 3;
+  private List<Movimiento> extracciones = new ArrayList<>();
+  private List<Movimiento> depositos = new ArrayList<>();
 
   public Cuenta(double montoInicial) {
     saldo = montoInicial;
@@ -22,12 +24,12 @@ public class Cuenta {
   public void poner(double cuanto) {
    this.checkearCantidadDepositosPermitidos();
    this.agregarSaldo(cuanto);
-   this.agregarMovimiento(LocalDate.now(), cuanto, true);
+   this.agregarDeposito(cuanto);
   }
 
   private void checkearCantidadDepositosPermitidos(){
-    if (getMovimientos().stream().filter(movimiento -> movimiento.isDeposito()).count() >= 3) {
-      throw new MaximaCantidadDepositosException("Ya excedio los " + 3 + " depositos diarios");
+    if (depositos.stream().filter(movimiento -> movimiento.getFecha().getDayOfYear() == LocalDate.now().getDayOfYear()).count() >= DEPOSITOS_MAXIMO_DIAROS) {
+      throw new MaximaCantidadDepositosException("Ya excedio los " + DEPOSITOS_MAXIMO_DIAROS + " depositos diarios");
     }
   }
 
@@ -52,7 +54,7 @@ public class Cuenta {
     this.checkearMontoPositivo(cuanto);
     this.checkLimiteDiarioExtraccion(cuanto);
     this.quitarSaldo(cuanto);
-    this.agregarMovimiento(LocalDate.now(), cuanto, false);
+    this.agregarExtraccion(cuanto);
   }
 
   private void quitarSaldo(double cuanto) {
@@ -69,20 +71,29 @@ public class Cuenta {
     }
   }
 
-  public void agregarMovimiento(LocalDate fecha, double cuanto, boolean esDeposito) {
-    Movimiento movimiento = new Movimiento(fecha, cuanto, esDeposito);
-    movimientos.add(movimiento);
+  public void agregarDeposito(double cuanto) {
+    Deposito deposito = new Deposito(LocalDate.now(), cuanto);
+    depositos.add(deposito);
+  }
+
+  public void agregarExtraccion(double cuanto) {
+    Extraccion extraccion = new Extraccion(LocalDate.now(), cuanto);
+    extracciones.add(extraccion);
   }
 
   public double getMontoExtraidoA(LocalDate fecha) {
-    return getMovimientos().stream()
-        .filter(movimiento -> !movimiento.isDeposito() && movimiento.getFecha().equals(fecha))
+    return extracciones.stream()
+        .filter(movimiento -> movimiento.getFecha().equals(fecha))
         .mapToDouble(Movimiento::getMonto)
         .sum();
   }
 
-  public List<Movimiento> getMovimientos() {
-    return movimientos;
+  public List<Movimiento> getDepositos() {
+    return depositos;
+  }
+
+  public List<Movimiento> getExtracciones() {
+    return extracciones;
   }
 
   public double getSaldo() {
